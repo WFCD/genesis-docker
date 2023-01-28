@@ -1,3 +1,4 @@
 [submodule "genesis"]
 	path = genesis
 	url = git@github.com:WFCD/genesis.git
+	branch = master

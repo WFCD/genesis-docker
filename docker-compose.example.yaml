@@ -1,62 +1,70 @@
-# Use root/example as user/password credentials
 version: '3.7'
 services:
-  db:
-    container_name: db
-    image: mariadb
-    hostname: db
-    command: --default-authentication-plugin=mysql_native_password
-    volumes:
-      - ./database/mysql/data/:/var/lib/mysql
+  # enable if leveraging a containerized database
+  #  db:
+  #    container_name: db
+  #    image: mariadb
+  #    hostname: db
+  #    command: --default-authentication-plugin=mysql_native_password
+  #    volumes:
+  #      - ./database/mysql/data/:/var/lib/mysql
+  #    restart: always
+  #    ports:
+  #      - 3306:3306
+  #    environment:
+  #      MYSQL_USER: "root"
+  #      MYSQL_ROOT_PASSWORD: "password"
+  #      MYSQL_DATABASE: "genesis"
+  #    healthcheck:
+  #      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+  #      timeout: 20s
+  #      retries: 10
+  bot:
+    container_name: genesis:bot
+    image: genesis/bot:latest
     restart: always
-    ports:
-      - 3306:3306
-    environment:
-      MYSQL_USER: "root"
-      MYSQL_ROOT_PASSWORD: "password"
-      MYSQL_DATABASE: "genesis"
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-  genesis:
-    container_name: genesis
-    image: genesis:latest
-    restart: always
-    depends_on:
-      - db
+    build: bot.Dockerfile
+    # disable below if using containerized database
+    network_mode: host
+    # enable below if leveraging a containerized database, like mariadb above
+    #    depends_on:
+    #      - db
     environment:
       # docker-compose-wait config
-      WAIT_HOSTS: db:3306
+      # WAIT_HOSTS: db:3306
+      # disable below if using containerized database
+      WAIT_HOSTS: localhost:3306
       WAIT_BEFORE_HOSTS: 10
       WAIT_HOSTS_TIMEOUT: 60
-      
+
       # Database config
-      MYSQL_HOST: db
+      # MYSQL_HOST: db
+      MYSQL_HOST: localhost
       MYSQL_PORT: 3306
       MYSQL_USER: root
       MYSQL_PASSWORD: password
       MYSQL_DB: genesis
-      
+
       # Discord config
       TOKEN: 'discord bot token'
-      PREFIX: '/'
       OWNER: '76685590585671680'
       HELP_URL: https://genesis.warframestat.us
       # INVITE_URL: https://bot.discord.io/genesis
-      
+      # CLIENT_ID: '76685590585671680'
+
       # Logging
       RAVEN_URL: 'raven logging url'
       LOG_LEVEL: ERROR
-      # CONTROL_WH_TOKEN: 'webhook token'
-      # CONTROL_WH_ID: 'webhook id'
-      # BUG_WH_ID: 'webhook id for bug channel goes here'
-      # BUG_WH_TOKEN: 'webhook token for bug channel goes here'
+      # CONTROL_GUILD_ID: 'guild id!'
+      # CONTROL_WH_ID: 'webhook token'
+      # CONTROL_WH_TOKEN: 'webhook id'
+      # BUG_WEBHOOK_ID: 'webhook id for bug channel goes here'
+      # BUG_WEBHOOK_TOKEN: 'webhook token for bug channel goes here'
 
       # Feature flags, node config
       NODE_ENV: development
       SCOPE: BOT
-      GAMES: UTIL,ROOMS,LOGGING
+      GAMES: UTIL,WARFRAME,ROOMS,CUST_CMDS,BOT_MGMT,CMD_MGMT,FUN
 
       # Sharding!!!
       SHARDS: 1
@@ -64,21 +72,82 @@ services:
       SHARD_OFFSET: 0
       CLUSTER_ID: 0
 
-      # Twitch notifications
-      # TWITCH_CLIENT_ID: "--REQUIRED--"
-      # TWITCH_USER_LOGIN: "warframe"
-      # TWITCH_POLL_INTERVAL_MS: 10000
-
-      # Tracking
-      # DISCORD_CARBON_TOKEN: "Not used yet"
-      # DISCORD_BOTS_WEB_USER: "Not used yet"
-      # DISCORD_BOTS_WEB_TOKEN: "Not used yet"
-
       # CDN & Other configurables
-      CDN_BASE_PATH: https://raw.githubusercontent.com/wfcd/warframe-items/development/data/
+      CDN_BASE_PATH: https://cdn.warframestat.us
       API_BASE_PATH: https://api.warframestat.us
       WORLDSTATE_TIMEOUT: 60000
-      
+
+      # Embed configurables
+      # LFG_EXPIRED_COLOR: 0xff0000
+      # LFG_ACTIVE_COLOR: 0x00ff00
+      # EMBED_URL: https://warframestat.us
+      # EMBED_ICON_URL: https://warframestat.us/wfcd_logo_color.png
+      # BASE_PRES_MSG: @Bot help
+      # BASE_PRES_ACT: WATCHING
+  notifier:
+    container_name: genesis:notifier
+    image: genesis/notifier:latest
+    restart: always
+    build: notifier.Dockerfile
+    # disable below if using containerized database
+    network_mode: host
+    # enable below if leveraging a containerized database, like mariadb above
+    #    depends_on:
+    #      - db
+    environment:
+      # docker-compose-wait config
+      # WAIT_HOSTS: db:3306
+      # disable below if using containerized database
+      WAIT_HOSTS: localhost:3306
+      WAIT_BEFORE_HOSTS: 10
+      WAIT_HOSTS_TIMEOUT: 60
+
+      # Database config
+      # MYSQL_HOST: db
+      MYSQL_HOST: localhost
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      MYSQL_DB: genesis
+
+      # Discord config
+      TOKEN: 'discord bot token'
+      OWNER: '76685590585671680'
+      HELP_URL: https://genesis.warframestat.us
+      # INVITE_URL: https://bot.discord.io/genesis
+      # CLIENT_ID: '76685590585671680'
+
+      # Logging
+      RAVEN_URL: 'raven logging url'
+      LOG_LEVEL: ERROR
+      # CONTROL_GUILD_ID: 'guild id!'
+      # CONTROL_WH_ID: 'webhook token'
+      # CONTROL_WH_TOKEN: 'webhook id'
+      # BUG_WH_ID: 'webhook id for bug channel goes here'
+      # BUG_WH_TOKEN: 'webhook token for bug channel goes here'
+
+      # Feature flags, node config
+      NODE_ENV: development
+      SCOPE: WORKER
+      GAMES: UTIL,WARFRAME,CUST_CMDS,RSS,TWITCH
+
+      # Sharding!!!
+      SHARDS: 1
+      LOCAL_SHARDS: 1
+      SHARD_OFFSET: 0
+      CLUSTER_ID: 0
+
+      # CDN & Other configurables
+      CDN_BASE_PATH: https://cdn.warframestat.us
+      API_BASE_PATH: https://api.warframestat.us
+      WORLDSTATE_TIMEOUT: 60000
+      DEF_USER: Genesis
+      PLATFORMS: pc
+
+      # Twitch
+      TWICH_CLIENT_ID: # client Id
+      TWITCH_CLIENT_SECRET: # client secret
+
       # Embed configurables
       # LFG_EXPIRED_COLOR: 0xff0000
       # LFG_ACTIVE_COLOR: 0x00ff00
