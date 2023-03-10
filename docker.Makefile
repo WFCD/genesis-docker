@@ -23,3 +23,6 @@ up_prod_notifier:
 up_prod_bot:
 	@docker-compose -f docker-compose.prod.yaml up -d bot
 up_prod: up_prod_notifier up_prod_bot
+down_prod:
+	@docker-compose -f docker-compose.prod.yaml down
+restart_prod: down_prod up_prod
