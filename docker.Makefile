@@ -31,5 +31,8 @@ down_prod:
 	notifier_sr notifier_tr notifier_uk notifier_zh && docker-compose -f docker-compose.prod.yaml rm bot notifier_cs notifier_de notifier_en \
 	notifier_es notifier_fr notifier_it notifier_ko notifier_pl notifier_pt notifier_ru \
 	notifier_sr notifier_tr notifier_uk notifier_zh
+down_prod_db:
+	@docker-compose -f docker-compose.prod.yaml stop db && docker-compose -f docker-compose.prod.yaml rm db
+down_prod_all: down_prod down_prod_db
 restart_prod: down_prod up_prod
-restart_prod_all:  down_prod up_prod_db up_prod
+restart_prod_all:  down_prod down_prod_db up_prod_db up_prod
