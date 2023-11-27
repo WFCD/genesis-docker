@@ -16,3 +16,4 @@ genesis/scripts/
 genesis/.github/
 genesis/database/
 genesis/.git
+database/*

@@ -22,7 +22,14 @@ up_prod_notifier:
 	notifier_sr notifier_tr notifier_uk notifier_zh
 up_prod_bot:
 	@docker-compose -f docker-compose.prod.yaml up -d bot
+up_prod_db:
+	@docker-compose -f docker-compose.prod.yaml up -d db
 up_prod: up_prod_notifier up_prod_bot
 down_prod:
-	@docker-compose -f docker-compose.prod.yaml down
+	@docker-compose -f docker-compose.prod.yaml stop bot notifier_cs notifier_de notifier_en \
+	notifier_es notifier_fr notifier_it notifier_ko notifier_pl notifier_pt notifier_ru \
+	notifier_sr notifier_tr notifier_uk notifier_zh && docker-compose -f docker-compose.prod.yaml rm bot notifier_cs notifier_de notifier_en \
+	notifier_es notifier_fr notifier_it notifier_ko notifier_pl notifier_pt notifier_ru \
+	notifier_sr notifier_tr notifier_uk notifier_zh
 restart_prod: down_prod up_prod
+restart_prod_all:  down_prod up_prod_db up_prod
