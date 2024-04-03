@@ -1,11 +1,11 @@
-FROM node:gallium-alpine as base
+FROM node:iron-alpine as base
 
 RUN apk --no-cache add git python3 make gcc musl-dev g++ bash
 WORKDIR /app/genesis
 COPY genesis/package*.json ./
 RUN npm ci
 
-FROM node:gallium-alpine as release
+FROM node:iron-alpine as release
 
 COPY --from=base --chown=node:node /app/genesis /app/genesis
 WORKDIR /app/genesis
